@@ -7,10 +7,13 @@ resource "aws_instance" "sentinel_app" {
   key_name               = var.key_name
 
   user_data = templatefile("${path.module}/user_data.sh.tpl", {
-    app_py           = file("${path.module}/../app/app.py")
-    requirements_txt = file("${path.module}/../app/requirements.txt")
-    cwagent_json     = file("${path.module}/../cloudwatch/amazon-cloudwatch-agent.json")
-    app_port         = var.app_port
+    app_py                        = file("${path.module}/../app/app.py")
+    requirements_txt              = file("${path.module}/../app/requirements.txt")
+    cwagent_json                  = file("${path.module}/../cloudwatch/amazon-cloudwatch-agent.json")
+    health_check_sh                = file("${path.module}/../monitoring/health_check.sh")
+    app_port                      = var.app_port
+    aws_region                    = var.aws_region
+    health_check_interval_seconds = var.health_check_interval_seconds
   })
 
   tags = {
