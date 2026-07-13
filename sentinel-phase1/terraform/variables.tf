@@ -44,15 +44,13 @@ variable "disk_alarm_threshold" {
 variable "cpu_alarm_threshold" {
   description = "CPU active percent above which the cpu alarm fires"
   type        = number
-  default     = 80
+  default     = 30
 }
-
 variable "health_check_interval_seconds" {
   description = "How often the on-instance health-check script runs and publishes its metric"
   type        = number
-  default     = 60
+  default     = 10
 }
-
 variable "collector_lookback_minutes" {
   description = "How many minutes of logs the Collector Lambda pulls when an alarm fires"
   type        = number

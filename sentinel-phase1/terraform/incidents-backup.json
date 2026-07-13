@@ -1,0 +1,584 @@
+{
+    "Items": [
+        {
+            "diagnosis": {
+                "M": {
+                    "severity": {
+                        "S": "medium"
+                    },
+                    "suggested_remediation": {
+                        "S": "Investigate the source IP 110.172.151.105 to determine if the requests to '/spike-cpu' are authorized. Implement rate limiting or block the IP if the traffic is malicious or accidental."
+                    },
+                    "action_type": {
+                        "S": "needs_approval"
+                    },
+                    "root_cause": {
+                        "S": "The CPU usage alarm was triggered by multiple requests to the '/spike-cpu' endpoint from IP 110.172.151.105, which spawned worker processes for 20 seconds each, driving CPU utilization above the 30% threshold."
+                    },
+                    "confidence": {
+                        "S": "high"
+                    }
+                }
+            },
+            "instance_id": {
+                "S": "i-0e48709545f6fbe7a"
+            },
+            "alarm_name": {
+                "S": "sentinel-cpu-high"
+            },
+            "action_taken": {
+                "M": {
+                    "action_type": {
+                        "S": "needs_approval"
+                    },
+                    "remediation": {
+                        "M": {
+                            "reason": {
+                                "S": "requires human approval"
+                            },
+                            "executed": {
+                                "BOOL": false
+                            }
+                        }
+                    }
+                }
+            },
+            "timestamp": {
+                "S": "2026-07-13T06:53:21.689435+00:00"
+            },
+            "incident_id": {
+                "S": "sentinel-cpu-high-1783925601"
+            },
+            "raw_event": {
+                "M": {
+                    "alarm_name": {
+                        "S": "sentinel-cpu-high"
+                    },
+                    "diagnosis": {
+                        "M": {
+                            "severity": {
+                                "S": "medium"
+                            },
+                            "suggested_remediation": {
+                                "S": "Investigate the source IP 110.172.151.105 to determine if the requests to '/spike-cpu' are authorized. Implement rate limiting or block the IP if the traffic is malicious or accidental."
+                            },
+                            "action_type": {
+                                "S": "needs_approval"
+                            },
+                            "root_cause": {
+                                "S": "The CPU usage alarm was triggered by multiple requests to the '/spike-cpu' endpoint from IP 110.172.151.105, which spawned worker processes for 20 seconds each, driving CPU utilization above the 30% threshold."
+                            },
+                            "confidence": {
+                                "S": "high"
+                            }
+                        }
+                    },
+                    "instance_id": {
+                        "S": "i-0e48709545f6fbe7a"
+                    }
+                }
+            }
+        },
+        {
+            "diagnosis": {
+                "M": {
+                    "severity": {
+                        "S": "medium"
+                    },
+                    "suggested_remediation": {
+                        "S": "Investigate manually. Error: The read operation timed out"
+                    },
+                    "action_type": {
+                        "S": "needs_approval"
+                    },
+                    "root_cause": {
+                        "S": "Diagnostic agent failed to produce an analysis."
+                    },
+                    "confidence": {
+                        "S": "low"
+                    }
+                }
+            },
+            "instance_id": {
+                "S": "i-017af6d4dbbdede0e"
+            },
+            "alarm_name": {
+                "S": "sentinel-health-check-failure"
+            },
+            "action_taken": {
+                "M": {
+                    "action_type": {
+                        "S": "needs_approval"
+                    },
+                    "remediation": {
+                        "M": {
+                            "reason": {
+                                "S": "requires human approval"
+                            },
+                            "executed": {
+                                "BOOL": false
+                            }
+                        }
+                    }
+                }
+            },
+            "timestamp": {
+                "S": "2026-07-13T07:12:41.557281+00:00"
+            },
+            "incident_id": {
+                "S": "sentinel-health-check-failure-1783926761"
+            },
+            "raw_event": {
+                "M": {
+                    "alarm_name": {
+                        "S": "sentinel-health-check-failure"
+                    },
+                    "diagnosis": {
+                        "M": {
+                            "severity": {
+                                "S": "medium"
+                            },
+                            "suggested_remediation": {
+                                "S": "Investigate manually. Error: The read operation timed out"
+                            },
+                            "action_type": {
+                                "S": "needs_approval"
+                            },
+                            "root_cause": {
+                                "S": "Diagnostic agent failed to produce an analysis."
+                            },
+                            "confidence": {
+                                "S": "low"
+                            }
+                        }
+                    },
+                    "instance_id": {
+                        "S": "i-017af6d4dbbdede0e"
+                    }
+                }
+            }
+        },
+        {
+            "diagnosis": {
+                "M": {
+                    "severity": {
+                        "S": "high"
+                    },
+                    "suggested_remediation": {
+                        "S": "Identify and block the source of the requests hitting the '/crash' endpoint to stabilize the server. Additionally, clear the junk files under '/var/sentinel-fill/' to reclaim disk space."
+                    },
+                    "action_type": {
+                        "S": "needs_approval"
+                    },
+                    "root_cause": {
+                        "S": "The health check failure was primarily triggered by repeated invocations of the '/crash' endpoint, causing the Flask development server to crash and restart continuously. High disk usage (93.3%) was also observed due to the '/fill-disk' endpoint writing to '/var/sentinel-fill/junk.bin'."
+                    },
+                    "confidence": {
+                        "S": "high"
+                    }
+                }
+            },
+            "instance_id": {
+                "S": "i-017af6d4dbbdede0e"
+            },
+            "alarm_name": {
+                "S": "sentinel-health-check-failure"
+            },
+            "action_taken": {
+                "M": {
+                    "action_type": {
+                        "S": "needs_approval"
+                    },
+                    "remediation": {
+                        "M": {
+                            "reason": {
+                                "S": "requires human approval"
+                            },
+                            "executed": {
+                                "BOOL": false
+                            }
+                        }
+                    }
+                }
+            },
+            "timestamp": {
+                "S": "2026-07-13T08:18:23.532637+00:00"
+            },
+            "incident_id": {
+                "S": "sentinel-health-check-failure-1783930703"
+            },
+            "raw_event": {
+                "M": {
+                    "alarm_name": {
+                        "S": "sentinel-health-check-failure"
+                    },
+                    "diagnosis": {
+                        "M": {
+                            "severity": {
+                                "S": "high"
+                            },
+                            "suggested_remediation": {
+                                "S": "Identify and block the source of the requests hitting the '/crash' endpoint to stabilize the server. Additionally, clear the junk files under '/var/sentinel-fill/' to reclaim disk space."
+                            },
+                            "action_type": {
+                                "S": "needs_approval"
+                            },
+                            "root_cause": {
+                                "S": "The health check failure was primarily triggered by repeated invocations of the '/crash' endpoint, causing the Flask development server to crash and restart continuously. High disk usage (93.3%) was also observed due to the '/fill-disk' endpoint writing to '/var/sentinel-fill/junk.bin'."
+                            },
+                            "confidence": {
+                                "S": "high"
+                            }
+                        }
+                    },
+                    "instance_id": {
+                        "S": "i-017af6d4dbbdede0e"
+                    }
+                }
+            }
+        },
+        {
+            "diagnosis": {
+                "M": {
+                    "severity": {
+                        "S": "high"
+                    },
+                    "suggested_remediation": {
+                        "S": "Delete the generated junk files under `/var/sentinel-fill/` to free up disk space."
+                    },
+                    "action_type": {
+                        "S": "auto_safe"
+                    },
+                    "root_cause": {
+                        "S": "The disk space usage exceeded the 85% threshold, reaching 93.31%, due to repeated invocations of the `/fill-disk` endpoint which wrote multiple 50MB junk files to `/var/sentinel-fill/junk.bin`."
+                    },
+                    "confidence": {
+                        "S": "high"
+                    }
+                }
+            },
+            "instance_id": {
+                "S": "i-017af6d4dbbdede0e"
+            },
+            "alarm_name": {
+                "S": "sentinel-disk-high"
+            },
+            "action_taken": {
+                "M": {
+                    "action_type": {
+                        "S": "auto_safe"
+                    },
+                    "remediation": {
+                        "M": {
+                            "output": {
+                                "S": "Cleanup complete. Disk usage: 94% -> 94%\n"
+                            },
+                            "executed": {
+                                "BOOL": true
+                            },
+                            "command_id": {
+                                "S": "eed5e023-af87-412b-a0cf-34dc18b5bf6e"
+                            },
+                            "status": {
+                                "S": "Success"
+                            }
+                        }
+                    }
+                }
+            },
+            "timestamp": {
+                "S": "2026-07-13T08:22:00.310251+00:00"
+            },
+            "incident_id": {
+                "S": "sentinel-disk-high-1783930920"
+            },
+            "raw_event": {
+                "M": {
+                    "alarm_name": {
+                        "S": "sentinel-disk-high"
+                    },
+                    "diagnosis": {
+                        "M": {
+                            "severity": {
+                                "S": "high"
+                            },
+                            "suggested_remediation": {
+                                "S": "Delete the generated junk files under `/var/sentinel-fill/` to free up disk space."
+                            },
+                            "action_type": {
+                                "S": "auto_safe"
+                            },
+                            "root_cause": {
+                                "S": "The disk space usage exceeded the 85% threshold, reaching 93.31%, due to repeated invocations of the `/fill-disk` endpoint which wrote multiple 50MB junk files to `/var/sentinel-fill/junk.bin`."
+                            },
+                            "confidence": {
+                                "S": "high"
+                            }
+                        }
+                    },
+                    "instance_id": {
+                        "S": "i-017af6d4dbbdede0e"
+                    }
+                }
+            }
+        },
+        {
+            "diagnosis": {
+                "M": {
+                    "severity": {
+                        "S": "high"
+                    },
+                    "suggested_remediation": {
+                        "S": "Delete the generated junk files under `/var/sentinel-fill/` to free up disk space."
+                    },
+                    "action_type": {
+                        "S": "auto_safe"
+                    },
+                    "root_cause": {
+                        "S": "The disk space reached 93.3% utilization because the `/fill-disk` demo endpoint was repeatedly triggered by client IP 110.172.151.105, writing multiple 50MB junk files to `/var/sentinel-fill/junk.bin`."
+                    },
+                    "confidence": {
+                        "S": "high"
+                    }
+                }
+            },
+            "instance_id": {
+                "S": "i-04c64618bfde8e83e"
+            },
+            "alarm_name": {
+                "S": "sentinel-disk-high"
+            },
+            "action_taken": {
+                "M": {
+                    "action_type": {
+                        "S": "auto_safe"
+                    },
+                    "remediation": {
+                        "M": {
+                            "output": {
+                                "S": "Cleanup complete. Disk usage: 94% -> 94%\n"
+                            },
+                            "executed": {
+                                "BOOL": true
+                            },
+                            "command_id": {
+                                "S": "989e5d36-9c16-4d0e-b7a7-b6d3a09aefd4"
+                            },
+                            "status": {
+                                "S": "Success"
+                            }
+                        }
+                    }
+                }
+            },
+            "timestamp": {
+                "S": "2026-07-13T05:54:25.044898+00:00"
+            },
+            "incident_id": {
+                "S": "sentinel-disk-high-1783922065"
+            },
+            "raw_event": {
+                "M": {
+                    "alarm_name": {
+                        "S": "sentinel-disk-high"
+                    },
+                    "diagnosis": {
+                        "M": {
+                            "severity": {
+                                "S": "high"
+                            },
+                            "suggested_remediation": {
+                                "S": "Delete the generated junk files under `/var/sentinel-fill/` to free up disk space."
+                            },
+                            "action_type": {
+                                "S": "auto_safe"
+                            },
+                            "root_cause": {
+                                "S": "The disk space reached 93.3% utilization because the `/fill-disk` demo endpoint was repeatedly triggered by client IP 110.172.151.105, writing multiple 50MB junk files to `/var/sentinel-fill/junk.bin`."
+                            },
+                            "confidence": {
+                                "S": "high"
+                            }
+                        }
+                    },
+                    "instance_id": {
+                        "S": "i-04c64618bfde8e83e"
+                    }
+                }
+            }
+        },
+        {
+            "diagnosis": {
+                "M": {
+                    "severity": {
+                        "S": "high"
+                    },
+                    "suggested_remediation": {
+                        "S": "Delete the accumulated junk files in /var/sentinel-fill/ to free up disk space."
+                    },
+                    "action_type": {
+                        "S": "auto_safe"
+                    },
+                    "root_cause": {
+                        "S": "The sentinel-disk-high alarm was triggered because the disk usage exceeded 93% due to repeated invocations of the /fill-disk endpoint, which wrote multiple 50MB junk files to /var/sentinel-fill/junk.bin."
+                    },
+                    "confidence": {
+                        "S": "high"
+                    }
+                }
+            },
+            "instance_id": {
+                "S": "i-0d6d3bc09e06adddb"
+            },
+            "alarm_name": {
+                "S": "sentinel-disk-high"
+            },
+            "action_taken": {
+                "M": {
+                    "action_type": {
+                        "S": "auto_safe"
+                    },
+                    "remediation": {
+                        "M": {
+                            "output": {
+                                "S": "Cleanup complete. Disk usage: 94% -> 94%\n"
+                            },
+                            "executed": {
+                                "BOOL": true
+                            },
+                            "command_id": {
+                                "S": "21305e23-96c3-4706-8fad-fdc3bb36b0ce"
+                            },
+                            "status": {
+                                "S": "Success"
+                            }
+                        }
+                    }
+                }
+            },
+            "timestamp": {
+                "S": "2026-07-13T05:26:38.146468+00:00"
+            },
+            "incident_id": {
+                "S": "sentinel-disk-high-1783920398"
+            },
+            "raw_event": {
+                "M": {
+                    "alarm_name": {
+                        "S": "sentinel-disk-high"
+                    },
+                    "diagnosis": {
+                        "M": {
+                            "severity": {
+                                "S": "high"
+                            },
+                            "suggested_remediation": {
+                                "S": "Delete the accumulated junk files in /var/sentinel-fill/ to free up disk space."
+                            },
+                            "action_type": {
+                                "S": "auto_safe"
+                            },
+                            "root_cause": {
+                                "S": "The sentinel-disk-high alarm was triggered because the disk usage exceeded 93% due to repeated invocations of the /fill-disk endpoint, which wrote multiple 50MB junk files to /var/sentinel-fill/junk.bin."
+                            },
+                            "confidence": {
+                                "S": "high"
+                            }
+                        }
+                    },
+                    "instance_id": {
+                        "S": "i-0d6d3bc09e06adddb"
+                    }
+                }
+            }
+        },
+        {
+            "diagnosis": {
+                "M": {
+                    "severity": {
+                        "S": "high"
+                    },
+                    "suggested_remediation": {
+                        "S": "Delete the generated junk files under '/var/sentinel-fill/' to reclaim disk space."
+                    },
+                    "action_type": {
+                        "S": "auto_safe"
+                    },
+                    "root_cause": {
+                        "S": "The disk space on the instance reached 93.3% (crossing the 85% threshold) due to repeated requests to the '/fill-disk' endpoint, which wrote multiple 50MB blocks to '/var/sentinel-fill/junk.bin'."
+                    },
+                    "confidence": {
+                        "S": "high"
+                    }
+                }
+            },
+            "instance_id": {
+                "S": "i-017af6d4dbbdede0e"
+            },
+            "alarm_name": {
+                "S": "sentinel-disk-high"
+            },
+            "action_taken": {
+                "M": {
+                    "action_type": {
+                        "S": "auto_safe"
+                    },
+                    "remediation": {
+                        "M": {
+                            "output": {
+                                "S": "Cleanup complete. Disk usage: 94% -> 94%\n"
+                            },
+                            "executed": {
+                                "BOOL": true
+                            },
+                            "command_id": {
+                                "S": "9547547c-5045-4d6f-8762-2ded8f7b5b13"
+                            },
+                            "status": {
+                                "S": "Success"
+                            }
+                        }
+                    }
+                }
+            },
+            "timestamp": {
+                "S": "2026-07-13T08:18:03.386207+00:00"
+            },
+            "incident_id": {
+                "S": "sentinel-disk-high-1783930683"
+            },
+            "raw_event": {
+                "M": {
+                    "alarm_name": {
+                        "S": "sentinel-disk-high"
+                    },
+                    "diagnosis": {
+                        "M": {
+                            "severity": {
+                                "S": "high"
+                            },
+                            "suggested_remediation": {
+                                "S": "Delete the generated junk files under '/var/sentinel-fill/' to reclaim disk space."
+                            },
+                            "action_type": {
+                                "S": "auto_safe"
+                            },
+                            "root_cause": {
+                                "S": "The disk space on the instance reached 93.3% (crossing the 85% threshold) due to repeated requests to the '/fill-disk' endpoint, which wrote multiple 50MB blocks to '/var/sentinel-fill/junk.bin'."
+                            },
+                            "confidence": {
+                                "S": "high"
+                            }
+                        }
+                    },
+                    "instance_id": {
+                        "S": "i-017af6d4dbbdede0e"
+                    }
+                }
+            }
+        }
+    ],
+    "Count": 7,
+    "ScannedCount": 7,
+    "ConsumedCapacity": null
+}
