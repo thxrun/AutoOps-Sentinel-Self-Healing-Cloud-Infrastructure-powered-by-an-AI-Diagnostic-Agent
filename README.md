@@ -4,7 +4,7 @@
 
 AutoOps Sentinel is a DevOps automation system that detects infrastructure issues in real time, uses an AI agent to diagnose the root cause from logs and metrics, and either auto-remediates the issue or escalates it to a human with a precise, evidence-backed explanation — instead of a generic threshold alert.
 
-Built entirely within the AWS Free Tier, using Terraform for infrastructure-as-code and Groq (Llama 3.3) as the reasoning engine for the AI agent.
+Built entirely within the AWS Free Tier, using Terraform for infrastructure-as-code and Gemini as the reasoning engine for the AI agent.
 
 ---
 
@@ -39,7 +39,7 @@ Small teams and solo developers rarely have 24/7 site-reliability coverage. When
 AutoOps Sentinel closes that gap with a full **observe → diagnose → decide → act** loop:
 
 1. **Observe** — CloudWatch continuously collects metrics and logs from the monitored EC2 instance.
-2. **Diagnose** — When an alarm fires, an AI agent (via the Groq API) is handed the relevant logs and metrics and produces a structured root-cause analysis.
+2. **Diagnose** — When an alarm fires, an AI agent (via the Gemini API) is handed the relevant logs and metrics and produces a structured root-cause analysis.
 3. **Decide** — The agent classifies its recommended action as either safe to automate or requiring human approval.
 4. **Act** — Safe actions are executed automatically via AWS Systems Manager (SSM); everything else is escalated to Slack/Telegram with the AI's full reasoning attached.
 
@@ -49,67 +49,53 @@ Every incident and every AI decision is logged, producing an auditable incident 
 
 ## Architecture
 
+```mermaid
+%%{init: {'flowchart': {'nodeSpacing': 80, 'rankSpacing': 90, 'curve': 'basis'}, 'themeVariables': {'fontSize': '18px'}}}%%
+flowchart TD
+    A["EC2 t2.micro
+    Sample App + Agent
+    CloudWatch Agent"] -->|metrics + logs| B["CloudWatch
+    Alarms + Log Groups"]
+    B -->|alarm state change| C["EventBridge Rule"]
+    C --> D["Lambda #1: Collector
+    Pulls logs + metrics
+    via Logs Insights"]
+    D --> E["Gemini API
+    AI Diagnostic Agent
+    → structured JSON"]
+    E --> F["Lambda #2: Executor
+    Routes decision"]
+    F -->|auto_safe| G["SSM Run Command
+    Auto-fix"]
+    F -->|needs_approval / always| H["SNS → Slack / Telegram
+    Alert"]
+    G --> I[("DynamoDB
+    Incident History Log")]
+    H --> I
+
+    classDef plain fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+
+    class A,B,C,D,E,F,G,H,I plain
 ```
-                        ┌───────────────────────┐
-                        │   EC2 (t2.micro)       │
-                        │   Sample App + Agent   │
-                        │   CloudWatch Agent     │
-                        └───────────┬────────────┘
-                                    │ metrics + logs
-                                    ▼
-                        ┌───────────────────────┐
-                        │   CloudWatch           │
-                        │   Alarms + Log Groups  │
-                        └───────────┬────────────┘
-                                    │ alarm state change
-                                    ▼
-                        ┌───────────────────────┐
-                        │   EventBridge Rule     │
-                        └───────────┬────────────┘
-                                    ▼
-                        ┌───────────────────────┐
-                        │  Lambda #1: Collector  │
-                        │  Pulls logs + metrics  │
-                        │  via Logs Insights     │
-                        └───────────┬────────────┘
-                                    ▼
-                        ┌───────────────────────┐
-                        │   Groq API (Llama 3.3) │
-                        │   AI Diagnostic Agent  │
-                        │   → structured JSON    │
-                        └───────────┬────────────┘
-                                    ▼
-                        ┌───────────────────────┐
-                        │  Lambda #2: Executor   │
-                        │  Routes decision       │
-                        └──────┬────────────┬────┘
-                               ▼            ▼
-                    ┌──────────────┐  ┌──────────────────┐
-                    │  SSM Run Cmd │  │  SNS → Slack/     │
-                    │  Auto-fix    │  │  Telegram alert   │
-                    └──────────────┘  └──────────────────┘
-                               │            │
-                               ▼            ▼
-                        ┌───────────────────────┐
-                        │  DynamoDB              │
-                        │  Incident history log  │
-                        └───────────────────────┘
-```
+
+**Flow summary:** EC2 emits metrics/logs → CloudWatch alarms fire on thresholds → EventBridge routes the state change → the Collector Lambda assembles a diagnostic payload → the Gemini-powered agent returns a structured root-cause decision → the Executor Lambda either runs an approved SSM fix, sends a Slack/Telegram alert, or both → every outcome is written to DynamoDB for audit.
+
+---
 
 ## Tech Stack
 
-| Layer                  | Tool / Service                                  |
-|-------------------------|--------------------------------------------------|
-| Infrastructure as Code  | Terraform                                        |
-| Compute                 | AWS EC2 (t2.micro, Free Tier)                    |
-| Monitoring               | AWS CloudWatch (Metrics, Logs, Alarms, Insights) |
-| Event Routing            | AWS EventBridge                                  |
-| Serverless Compute       | AWS Lambda                                       |
-| Remediation Execution    | AWS Systems Manager (SSM Run Command)            |
-| Notifications             | AWS SNS → Slack / Telegram webhook              |
-| Incident Storage          | AWS DynamoDB                                    |
-| AI Reasoning Engine       | Groq API (Llama 3.3 70B)                        |
-| Language                  | Python 3.12                                     |
+| Layer                 | Tool / Service                                   |
+|------------------------|---------------------------------------------------|
+| Infrastructure as Code | Terraform                                          |
+| Compute                | AWS EC2 (t2.micro, Free Tier)                      |
+| Monitoring             | AWS CloudWatch (Metrics, Logs, Alarms, Insights)   |
+| Event Routing          | AWS EventBridge                                    |
+| Serverless Compute     | AWS Lambda                                         |
+| Remediation Execution  | AWS Systems Manager (SSM Run Command)              |
+| Notifications          | AWS SNS → Slack / Telegram webhook                 |
+| Incident Storage       | AWS DynamoDB                                       |
+| AI Reasoning Engine    | Gemini API (Gemini 2.5 Flash)                      |
+| Language               | Python 3.12                                        |
 
 ---
 
@@ -127,7 +113,8 @@ Every incident and every AI decision is logged, producing an auditable incident 
 - Install and configure the CloudWatch Agent on the instance to ship:
   - System logs and application logs
   - Custom metrics: disk usage, memory usage (CPU is available by default)
-- **Deliverable:** `terraform apply` stands up the full environment; logs and metrics are visible in the CloudWatch console.
+
+**Deliverable:** `terraform apply` stands up the full environment; logs and metrics are visible in the CloudWatch console.
 
 ### Phase 2 — Detection Layer
 
@@ -143,13 +130,14 @@ Every incident and every AI decision is logged, producing an auditable incident 
   - Runs a CloudWatch Logs Insights query to pull the last N minutes of relevant logs
   - Pulls current metric values
   - Packages everything into a clean JSON payload for the AI agent
-- **Deliverable:** Breaking something on the EC2 instance reliably triggers an alarm and produces a structured payload in Lambda logs.
+
+**Deliverable:** Breaking something on the EC2 instance reliably triggers an alarm and produces a structured payload in Lambda logs.
 
 ### Phase 3 — AI Agent Layer
 
 **Goal:** Turn raw logs and metrics into an actionable, structured diagnosis.
 
-- Integrate the Groq API (Llama 3.3 70B) into Lambda
+- Integrate the Gemini API (Gemini 2.5 Flash) into Lambda
 - Design a system prompt that forces structured JSON output:
 
 ```json
@@ -163,7 +151,8 @@ Every incident and every AI decision is logged, producing an auditable incident 
 ```
 
 - Define a **fixed, version-controlled "safe action list"** up front (see [Safety Design](#safety-design)) — the agent may only select from this list for `auto_safe` classification; anything else is automatically routed to `needs_approval`
-- **Deliverable:** Given a sample log payload, the agent reliably returns valid structured JSON with a sensible diagnosis.
+
+**Deliverable:** Given a sample log payload, the agent reliably returns valid structured JSON with a sensible diagnosis.
 
 ### Phase 4 — Action & Notification Layer
 
@@ -175,7 +164,8 @@ Every incident and every AI decision is logged, producing an auditable incident 
   - Always publishes an incident record to SNS regardless of action type
 - Connect SNS to a Slack or Telegram webhook — the message includes root cause, action taken (or needed), and the AI's reasoning
 - Write every incident (payload, diagnosis, action, outcome, timestamp) to a DynamoDB table
-- **Deliverable:** Triggering `/fill-disk` results in either an automatic fix with a Slack confirmation, or a Slack alert requesting approval — and a row appears in DynamoDB either way.
+
+**Deliverable:** Triggering `/fill-disk` results in either an automatic fix with a Slack confirmation, or a Slack alert requesting approval — and a row appears in DynamoDB either way.
 
 ### Phase 5 — Dashboard, Polish & Demo
 
@@ -185,7 +175,8 @@ Every incident and every AI decision is logged, producing an auditable incident 
 - Write a "chaos" script that triggers each failure mode on demand for reliable demos
 - Record a short demo: break something → watch detection → watch AI diagnosis → watch auto-fix or Slack alert
 - Finalize this README with an architecture diagram screenshot and demo GIF/video link
-- **Deliverable:** A polished, demo-ready project with visual evidence of the full loop working end to end.
+
+**Deliverable:** A polished, demo-ready project with visual evidence of the full loop working end to end.
 
 ---
 
@@ -193,11 +184,13 @@ Every incident and every AI decision is logged, producing an auditable incident 
 
 Because this system can take real actions on real infrastructure, safety boundaries are defined explicitly and enforced in code — not left to the AI's judgment alone.
 
-- **Fixed safe-action allowlist.** The agent can only trigger automated remediation for actions on a predefined list (e.g., restart a named service, clear `/tmp`, rotate logs). It cannot invent new actions to auto-execute.
-- **Default to human approval.** Anything outside the allowlist — or anything the agent is not highly confident about — is always routed to Slack/Telegram for manual approval, never executed automatically.
-- **Least-privilege IAM.** The Lambda execution role and the SSM automation role are scoped to only the specific actions and resources they need.
-- **Full audit trail.** Every diagnosis and every action (automated or human-approved) is logged to DynamoDB with a timestamp, making the system's behavior fully reviewable after the fact.
-- **Recommended rollout order.** Start with *everything* requiring human approval via a Slack button, and only promote specific, well-understood action types to full automation once they've proven reliable. This mirrors how real production auto-remediation systems are rolled out safely.
+| Principle | Description |
+|---|---|
+| **Fixed safe-action allowlist** | The agent can only trigger automated remediation for actions on a predefined list (e.g., restart a named service, clear `/tmp`, rotate logs). It cannot invent new actions to auto-execute. |
+| **Default to human approval** | Anything outside the allowlist — or anything the agent is not highly confident about — is always routed to Slack/Telegram for manual approval, never executed automatically. |
+| **Least-privilege IAM** | The Lambda execution role and the SSM automation role are scoped to only the specific actions and resources they need. |
+| **Full audit trail** | Every diagnosis and every action (automated or human-approved) is logged to DynamoDB with a timestamp, making the system's behavior fully reviewable after the fact. |
+| **Recommended rollout order** | Start with *everything* requiring human approval via a Slack button, and only promote specific, well-understood action types to full automation once they've proven reliable. This mirrors how real production auto-remediation systems are rolled out safely. |
 
 ---
 
@@ -220,7 +213,7 @@ autoops-sentinel/
 │       └── handler.py
 ├── agent/
 │   ├── prompt_template.py
-│   └── groq_client.py
+│   └── gemini_client.py
 ├── app/
 │   └── sample_app.py        # Breakable demo app
 ├── scripts/
@@ -238,10 +231,11 @@ autoops-sentinel/
 ## Setup & Deployment
 
 **Prerequisites**
+
 - AWS account (Free Tier eligible)
 - AWS CLI configured
 - Terraform installed
-- A Groq API key
+- A Gemini API key
 - A Slack or Telegram webhook URL
 
 **Steps**
@@ -253,7 +247,7 @@ cd autoops-sentinel
 
 # 2. Configure variables
 cp terraform/terraform.tfvars.example terraform/terraform.tfvars
-# edit terraform.tfvars with your AWS region, key pair name, Groq API key, webhook URL
+# edit terraform.tfvars with your AWS region, key pair name, Gemini API key, webhook URL
 
 # 3. Deploy infrastructure
 cd terraform
@@ -292,14 +286,16 @@ terraform apply
 
 This project is designed to stay within AWS Free Tier limits for a portfolio project that isn't running constant production traffic:
 
-- **EC2 t2.micro** — 750 free hours/month (first 12 months)
-- **Lambda** — 1M free requests/month, well within demo usage
-- **CloudWatch** — free tier covers basic alarms and a modest log volume; keep log retention short (e.g., 3–7 days) to stay well under limits
-- **DynamoDB** — free tier covers 25GB storage and generous read/write capacity, far more than incident logging needs
-- **SNS** — free tier covers more notifications than a demo project will generate
-- **Groq API** — free tier is generous for intermittent, event-driven usage like this
+| Service | Free Tier Allowance |
+|---|---|
+| **EC2 t2.micro** | 750 free hours/month (first 12 months) |
+| **Lambda** | 1M free requests/month, well within demo usage |
+| **CloudWatch** | Free tier covers basic alarms and a modest log volume; keep log retention short (e.g., 3–7 days) to stay well under limits |
+| **DynamoDB** | Free tier covers 25GB storage and generous read/write capacity, far more than incident logging needs |
+| **SNS** | Free tier covers more notifications than a demo project will generate |
+| **Gemini API** | Free tier is generous for intermittent, event-driven usage like this |
 
-Set a AWS Budget alert as a safety net regardless — good practice, and doubles as a nod to the CostGuard-style idea if you want to mention it in an interview.
+Set an AWS Budget alert as a safety net regardless — good practice, and doubles as a nod to the CostGuard-style idea if you want to mention it in an interview.
 
 ---
 

@@ -1,17 +1,17 @@
-# Terraform
-**/.terraform/
+# Terraform state - contains resource IDs, sometimes secret values in plaintext
 *.tfstate
 *.tfstate.*
+.terraform/
 .terraform.lock.hcl
-terraform.tfvars
+
+# Build artifacts
+terraform/build/
+
+# Secrets / keys
 *.pem
+*.tfvars
+!*.tfvars.example
 
-# Python
-__pycache__/
-*.pyc
-
-# VS Code
-.vscode/
-
-# Node
-node_modules/
+# OS junk
+.DS_Store
+Thumbs.db
