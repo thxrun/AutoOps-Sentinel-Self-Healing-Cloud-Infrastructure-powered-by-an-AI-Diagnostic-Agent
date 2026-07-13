@@ -97,7 +97,7 @@ resource "aws_iam_role_policy" "executor_lambda_policy" {
       {
         Effect   = "Allow"
         Action   = ["sns:Publish"]
-        Resource = "*" # scope this to your actual SNS topic ARN once you paste it in
+        Resource = aws_sns_topic.diagnostic_alerts.arn
       },
       {
         Effect   = "Allow"
@@ -122,7 +122,7 @@ resource "aws_lambda_function" "executor" {
     variables = {
       INCIDENTS_TABLE  = aws_dynamodb_table.incidents.name
       SSM_DOCUMENT_NAME = aws_ssm_document.cleanup_fill_disk.name
-      SNS_TOPIC_ARN     = "" # PASTE your existing sentinel-diagnostic-alerts topic ARN here
+      SNS_TOPIC_ARN     = aws_sns_topic.diagnostic_alerts.arn
     }
   }
 
@@ -200,20 +200,16 @@ resource "aws_lambda_function" "slack_notifier" {
   }
 }
 
-# PASTE your existing SNS topic resource name/ARN in place of the
-# placeholder below — this subscribes Slack notifier to the SAME topic
-# your email already listens to.
-#
-# resource "aws_sns_topic_subscription" "slack" {
-#   topic_arn = "<your sentinel-diagnostic-alerts ARN>"
-#   protocol  = "lambda"
-#   endpoint  = aws_lambda_function.slack_notifier.arn
-# }
-#
-# resource "aws_lambda_permission" "allow_sns_slack" {
-#   statement_id  = "AllowSNSInvoke"
-#   action        = "lambda:InvokeFunction"
-#   function_name = aws_lambda_function.slack_notifier.function_name
-#   principal     = "sns.amazonaws.com"
-#   source_arn    = "<your sentinel-diagnostic-alerts ARN>"
-# }
+resource "aws_sns_topic_subscription" "slack" {
+  topic_arn = aws_sns_topic.diagnostic_alerts.arn
+  protocol  = "lambda"
+  endpoint  = aws_lambda_function.slack_notifier.arn
+}
+
+resource "aws_lambda_permission" "allow_sns_slack" {
+  statement_id  = "AllowSNSInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.slack_notifier.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.diagnostic_alerts.arn
+}

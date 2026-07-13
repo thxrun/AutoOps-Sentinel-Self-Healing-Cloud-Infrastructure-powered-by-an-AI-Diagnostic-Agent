@@ -6,6 +6,11 @@ resource "aws_instance" "sentinel_app" {
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
   key_name               = var.key_name
 
+  root_block_device {
+    volume_size = 4
+    volume_type = "gp3"
+  }
+
   user_data = templatefile("${path.module}/user_data.sh.tpl", {
     app_py                        = file("${path.module}/../app/app.py")
     requirements_txt              = file("${path.module}/../app/requirements.txt")

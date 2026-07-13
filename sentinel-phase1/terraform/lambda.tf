@@ -76,10 +76,11 @@ resource "aws_lambda_function" "collector" {
 
   environment {
     variables = {
-      APP_LOG_GROUP    = "/sentinel/app"
-      METRIC_NAMESPACE = "Sentinel"
-      INSTANCE_ID      = aws_instance.sentinel_app.id
-      LOOKBACK_MINUTES = tostring(var.collector_lookback_minutes)
+      APP_LOG_GROUP          = "/sentinel/app"
+      METRIC_NAMESPACE       = "Sentinel"
+      INSTANCE_ID            = aws_instance.sentinel_app.id
+      LOOKBACK_MINUTES       = tostring(var.collector_lookback_minutes)
+      DIAGNOSTIC_LAMBDA_NAME = aws_lambda_function.diagnostic.function_name
     }
   }
 

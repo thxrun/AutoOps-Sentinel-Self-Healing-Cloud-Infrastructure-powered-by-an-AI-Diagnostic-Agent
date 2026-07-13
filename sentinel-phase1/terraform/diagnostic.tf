@@ -1,11 +1,21 @@
 # Phase 3 — AI Diagnostic Agent
 #
-# The Collector Lambda (lambda.tf) invokes this one synchronously at the end
+# The Collector Lambda (lambda.tf) invokes this one asynchronously at the end
 # of its own handler, passing its JSON payload straight through as the event.
-# This Lambda sends that payload to Gemini, gets back a structured diagnosis,
-# and publishes it to SNS -> email. No auto-remediation — this notifies a
-# human; executing "suggested_remediation" automatically is a deliberate
-# future step, not something wired up here.
+# This Lambda sends that payload to Gemini, gets back a structured diagnosis
+# (including action_type), publishes it to SNS -> email, and hands the
+# decision off to the Executor Lambda (executor.tf / Phase 4).
+
+variable "gemini_model" {
+  description = "Gemini model used by the diagnostic Lambda"
+  type        = string
+  default     = "gemini-3.5-flash"
+}
+
+variable "alert_email" {
+  description = "Email address for Sentinel diagnostic alerts"
+  type        = string
+}
 
 # ---- Secret: Gemini API key ----
 # The key itself is NOT set here — Terraform only creates the secret
@@ -109,9 +119,10 @@ resource "aws_lambda_function" "diagnostic" {
 
   environment {
     variables = {
-      GEMINI_SECRET_NAME = aws_secretsmanager_secret.gemini_api_key.name
-      GEMINI_MODEL        = var.gemini_model
-      SNS_TOPIC_ARN       = aws_sns_topic.diagnostic_alerts.arn
+      GEMINI_SECRET_NAME    = aws_secretsmanager_secret.gemini_api_key.name
+      GEMINI_MODEL          = var.gemini_model
+      SNS_TOPIC_ARN         = aws_sns_topic.diagnostic_alerts.arn
+      EXECUTOR_LAMBDA_NAME  = aws_lambda_function.executor.function_name
     }
   }
 
@@ -141,6 +152,22 @@ resource "aws_iam_role_policy" "collector_can_invoke_diagnostic" {
       Effect   = "Allow"
       Action   = ["lambda:InvokeFunction"]
       Resource = aws_lambda_function.diagnostic.arn
+    }]
+  })
+}
+
+# ---- Let the Diagnostic Lambda invoke the Executor Lambda (Phase 4) ----
+
+resource "aws_iam_role_policy" "diagnostic_can_invoke_executor" {
+  name = "${var.project_name}-diagnostic-invoke-executor"
+  role = aws_iam_role.diagnostic_lambda_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["lambda:InvokeFunction"]
+      Resource = aws_lambda_function.executor.arn
     }]
   })
 }

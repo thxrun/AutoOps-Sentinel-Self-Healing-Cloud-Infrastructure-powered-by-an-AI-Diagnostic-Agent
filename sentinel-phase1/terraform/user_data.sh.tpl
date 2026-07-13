@@ -1,9 +1,12 @@
 #!/bin/bash
 set -euxo pipefail
 
+
 # ---- 1. Base packages ----
 dnf update -y
-dnf install -y python3-pip amazon-cloudwatch-agent
+dnf install -y python3-pip amazon-cloudwatch-agent amazon-ssm-agent
+
+systemctl enable --now amazon-ssm-agent
 
 # ---- 2. Drop in the app ----
 mkdir -p /opt/sentinel-app

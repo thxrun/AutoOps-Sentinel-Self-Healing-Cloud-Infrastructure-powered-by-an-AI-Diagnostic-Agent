@@ -3,7 +3,6 @@
 # dimension match — SEARCH expressions aren't supported on alarms (only
 # dashboards), so these use plain metric blocks with the dimensions
 # confirmed from Phase 1's `aws cloudwatch list-metrics` output.
-
 resource "aws_cloudwatch_metric_alarm" "disk_high" {
   alarm_name          = "sentinel-disk-high"
   alarm_description   = "Disk usage above ${var.disk_alarm_threshold}% on ${aws_instance.sentinel_app.id}"
@@ -19,7 +18,6 @@ resource "aws_cloudwatch_metric_alarm" "disk_high" {
   dimensions = {
     InstanceId = aws_instance.sentinel_app.id
     path       = "/"
-    device     = var.disk_device
     fstype     = var.disk_fstype
   }
 
@@ -27,7 +25,6 @@ resource "aws_cloudwatch_metric_alarm" "disk_high" {
     Project = var.project_name
   }
 }
-
 resource "aws_cloudwatch_metric_alarm" "cpu_high" {
   alarm_name          = "sentinel-cpu-high"
   alarm_description   = "CPU usage above ${var.cpu_alarm_threshold}% on ${aws_instance.sentinel_app.id}"
