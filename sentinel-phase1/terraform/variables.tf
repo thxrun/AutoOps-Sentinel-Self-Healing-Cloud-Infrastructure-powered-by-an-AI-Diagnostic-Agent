@@ -1,5 +1,5 @@
 variable "aws_region" {
-  description = "AWS region to deploy into"
+  description = "AWS region to deploy into. Locked to us-east-1 — this is where Phase 1 was actually validated; the AWS CLI's own default region also resolves to us-east-1 on this machine, and letting them drift apart is what caused the earlier region-mismatch confusion."
   type        = string
   default     = "us-east-1"
 }
@@ -57,4 +57,16 @@ variable "collector_lookback_minutes" {
   description = "How many minutes of logs the Collector Lambda pulls when an alarm fires"
   type        = number
   default     = 10
+}
+
+variable "disk_device" {
+  description = "Block device name the CloudWatch Agent reports for the root volume (AL2023 on Nitro instances, e.g. t3.*, is nvme0n1p1)"
+  type        = string
+  default     = "nvme0n1p1"
+}
+
+variable "disk_fstype" {
+  description = "Filesystem type the CloudWatch Agent reports for the root volume"
+  type        = string
+  default     = "xfs"
 }

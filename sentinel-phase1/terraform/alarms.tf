@@ -1,21 +1,8 @@
-# Disk and CPU dimensions are actually deterministic for this setup, so
-# plain metric alarms are used instead of a metric_query/SEARCH expression
-# (SEARCH is not supported on CloudWatch Metric Alarms — it's a
-# GetMetricData/dashboard-only feature, which is what caused the earlier
-# `SEARCH is not supported on Metric Alarms` apply error).
-#
-# - disk: cloudwatch/amazon-cloudwatch-agent.json sets "drop_device": true,
-#   which removes the unpredictable `device` dimension. What's left
-#   (path="/", fstype="xfs" on AL2023) is fixed by the AMI, not by boot-time
-#   hardware naming.
-# - cpu: the agent config has no "resources" list under "cpu", so it only
-#   ever publishes one aggregated cpu_usage_active datapoint per instance —
-#   no extra "cpu" dimension is added at all.
-#
-# If you ever change the agent config (e.g. add per-core CPU or multiple
-# disk mounts), re-check the actual dimension set with:
-#   aws cloudwatch list-metrics --namespace Sentinel --metric-name disk_used_percent
-#   aws cloudwatch list-metrics --namespace Sentinel --metric-name cpu_usage_active
+# CloudWatch Agent publishes disk/cpu metrics with extra dimensions
+# (device, fstype, cpu) beyond just InstanceId. Alarms require an exact
+# dimension match — SEARCH expressions aren't supported on alarms (only
+# dashboards), so these use plain metric blocks with the dimensions
+# confirmed from Phase 1's `aws cloudwatch list-metrics` output.
 
 resource "aws_cloudwatch_metric_alarm" "disk_high" {
   alarm_name          = "sentinel-disk-high"
@@ -32,7 +19,8 @@ resource "aws_cloudwatch_metric_alarm" "disk_high" {
   dimensions = {
     InstanceId = aws_instance.sentinel_app.id
     path       = "/"
-    fstype     = "xfs" # AL2023 default root filesystem
+    device     = var.disk_device
+    fstype     = var.disk_fstype
   }
 
   tags = {
@@ -54,6 +42,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
 
   dimensions = {
     InstanceId = aws_instance.sentinel_app.id
+    cpu        = "cpu-total"
   }
 
   tags = {
